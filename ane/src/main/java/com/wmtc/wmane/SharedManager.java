@@ -24,6 +24,7 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
     private Activity activity;
     private List<AISharedPlatformSDKInfo> sdkInfos;
     private List<AISharedPlatformScene> scenes;
+    private List<String> menus;
 
     private SharedFinishCallback callback;
     private SharedDataModel data;
@@ -38,7 +39,12 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
     private static final  String QQ_APP_SECRET = "HDTXtnSO0WkAPIgc";
     private static final  String QQ_APP_REDIRECTURI = "";
 
+    // 分享回调函数
+    public interface SharedFinishCallback {
+        void finishSharedCallback(int statusCode, Object resp);
+    }
 
+    // 单例函数
     public static final SharedManager getSingleton() {
         return LazyHolder.INSTANCE;
     }
@@ -47,25 +53,58 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
         private static final SharedManager INSTANCE = new SharedManager();
     }
 
+    // 是否安装微信、QQ等app
     public boolean isInstallSharedApp () {
         return wx_api.isWXAppInstalled();
     }
 
+    // 注册
     public void regiterSharedSDK(Activity activity) {
 
         this.activity = activity;
-        this.sdkInfos = new ArrayList<>();
-        this.scenes = new ArrayList<>();
-
         this.actionSheet = new ActionSheet(this.activity);
         this.actionSheet.setCancelable(false);
         this.actionSheet.setCanceledOnTouchOutside(true);
+        this.actionSheet.setItemClickListener(this);
+
+        this.sdkInfos = new ArrayList<>();
+        this.scenes = new ArrayList<>();
+        this.menus = new ArrayList<>();
 
         AISharedPlatformSDKInfo sdk1 = new AISharedPlatformSDKInfo(E_AIPlatfrom.AIPlatfromWechat,
                 WX_APP_ID,WX_APP_SECRET,WX_APP_REDIRECTURI);
         this.sdkInfos.add(sdk1);
+        this.registerSharedPlatform();
+    }
 
-        registerSharedPlatform();
+    private void registerSharedPlatform() {
+
+        for (AISharedPlatformSDKInfo item:this.sdkInfos) {
+
+            E_AIPlatfrom platform = item.platfrom;
+            if (platform == E_AIPlatfrom.AIPlatfromWechat) {
+                this.wx_api = WXAPIFactory.createWXAPI(this.activity,WX_APP_ID,true);
+                this.wx_api.registerApp(WX_APP_ID);
+
+                this.scenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneSession,"分享到微信好友"));
+                this.scenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneTimeline,"分享到微信朋友圈"));
+                this.scenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneFavorite,"分享到微信收藏"));
+            } else if(platform == E_AIPlatfrom.AIPlatfromQQ) {
+
+            } else if (platform == E_AIPlatfrom.AIPlatfromWeibo) {
+
+            }
+        }
+
+        this.addActionSheetMenu();
+    }
+
+    private void addActionSheetMenu() {
+        for (AISharedPlatformScene scene:this.scenes ) {
+            this.menus.add(scene.sceneName);
+        }
+
+        this.actionSheet.setOtherButtonTitlesSimple(this.menus);
     }
 
 
@@ -85,36 +124,6 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
         } else if (scene.platfrom == E_AIPlatfrom.AIPlatfromWeibo ) {
             sharedToWeibo(scene);
         }
-    }
-
-    private void registerSharedPlatform() {
-
-        for (AISharedPlatformSDKInfo item:this.sdkInfos) {
-
-            E_AIPlatfrom platform = item.platfrom;
-            if (platform == E_AIPlatfrom.AIPlatfromWechat) {
-                wx_api = WXAPIFactory.createWXAPI(this.activity,WX_APP_ID,true);
-                wx_api.registerApp(WX_APP_ID);
-
-                this.scenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneSession,"分享到微信好友"));
-                this.scenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneTimeline,"分享到微信朋友圈"));
-                this.scenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneFavorite,"分享到微信收藏"));
-            } else if(platform == E_AIPlatfrom.AIPlatfromQQ) {
-
-            } else if (platform == E_AIPlatfrom.AIPlatfromWeibo) {
-
-            }
-            addActionSheetMenu();
-        }
-    }
-
-    private void addActionSheetMenu() {
-        List<String> menus = new ArrayList<>();
-        for (AISharedPlatformScene scene:this.scenes ) {
-            menus.add(scene.sceneName);
-        }
-
-        this.actionSheet.setOtherButtonTitlesSimple(menus);
     }
 
     private void sharedToWeixin(AISharedPlatformScene scene) {
@@ -190,37 +199,6 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
 
     }
 
-
-    public interface SharedFinishCallback {
-        void finishSharedCallback(int statusCode, Object resp);
-    }
-
-    private static class APIHelper {
-
-        private static final int THUMB_SIZE = 100;
-        public static byte[] bmpToByteArray(final Bitmap bmp, final boolean needRecycle) {
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.PNG, 100, output);
-            if (needRecycle) {
-                bmp.recycle();
-            }
-
-            byte[] result = output.toByteArray();
-            try {
-                output.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return result;
-        }
-
-        public static String buildTransaction(final String type) {
-            return (type == null) ? String.valueOf(System.currentTimeMillis()) : type + System.currentTimeMillis();
-        }
-    }
-
-
     private static enum E_AIPlatfrom {
         AIPlatfromWechat,
         AIPlatfromQQ,
@@ -284,6 +262,31 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
         public String url;
         public String lowBandUrl;
         public Bitmap image;
+    }
+
+    private static class APIHelper {
+
+        private static final int THUMB_SIZE = 100;
+        public static byte[] bmpToByteArray(final Bitmap bmp, final boolean needRecycle) {
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, output);
+            if (needRecycle) {
+                bmp.recycle();
+            }
+
+            byte[] result = output.toByteArray();
+            try {
+                output.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return result;
+        }
+
+        public static String buildTransaction(final String type) {
+            return (type == null) ? String.valueOf(System.currentTimeMillis()) : type + System.currentTimeMillis();
+        }
     }
 }
 

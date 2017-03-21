@@ -18,12 +18,6 @@ public class wmane implements FREExtension {
     @Override
     public FREContext createContext(String s) {
         WMContext Context = new WMContext();
-        try {
-            wmane.setResourctID("com.wmtc.wmane.R",Context);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         return Context;
     }
 

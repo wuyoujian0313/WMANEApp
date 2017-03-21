@@ -4,12 +4,8 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
 
-    //需要加入的两句话
-//    aaptOptions.cruncherEnabled = false
-//    aaptOptions.useNewCruncher = false
-
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -25,15 +21,14 @@ android {
     }
 }
 
+
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:25.2.0'
-    compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:1.0.2'
-    //compile 'com.baoyz.actionsheet:library:1.1.7'
-
     testCompile 'junit:junit:4.12'
 }
 
@@ -42,6 +37,7 @@ dependencies {
 task makeJar(type: Copy) {
     //删除存在的
     delete 'build/libs/com.wmtc.wmane.jar'
+    delete 'com.wmtc.wmane.jar'
     //设置拷贝的文件
     from('build/intermediates/bundles/release/')
     //打进jar包后的文件目录
@@ -53,6 +49,7 @@ task makeJar(type: Copy) {
     //重命名
     rename ('classes.jar', 'com.wmtc.wmane.jar')
 }
+
 
 makeJar.dependsOn(build)
 //在终端执行生成JAR包
