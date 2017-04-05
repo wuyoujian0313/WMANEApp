@@ -1,4 +1,4 @@
-package com.weimeitc.wmaneapp;
+package com.weimeitc.bqwx;
 
 
 
@@ -9,9 +9,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.wmtc.wmane.*;
+
+//air.com.weimeitc.bqwx:039fcbae92e6388b7a9babf728ddf696
+//air.com.weimeitc.bqdj:233936a9c7c6ff761eb23e34f0e55ceb
 
 public class MainActivity extends AppCompatActivity {
     private Button btn1;

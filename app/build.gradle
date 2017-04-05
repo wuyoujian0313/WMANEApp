@@ -4,12 +4,9 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
 
-//    //需要加入的两句话
-//    aaptOptions.cruncherEnabled = false
-//    aaptOptions.useNewCruncher = false
 
     defaultConfig {
-        applicationId "com.weimeitc.wmaneapp"
+        applicationId "air.com.weimeitc.bqwx"
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 1

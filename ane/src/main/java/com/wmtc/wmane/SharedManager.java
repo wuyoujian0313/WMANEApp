@@ -8,36 +8,48 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.widget.Toast;
 
+import com.tencent.connect.auth.QQToken;
+import com.tencent.connect.share.QQShare;
 import com.tencent.mm.opensdk.modelmsg.*;
 import com.tencent.mm.opensdk.openapi.*;
+import com.tencent.tauth.IUiListener;
+import com.tencent.tauth.Tencent;
+import com.tencent.tauth.UiError;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SharedManager implements ActionSheet.IActionSheetListener {
+public class SharedManager implements ActionSheet.IActionSheetListener,IUiListener {
 
-    private ActionSheet actionSheet;
-    private Activity activity;
-    private List<AISharedPlatformSDKInfo> sdkInfos;
-    private List<AISharedPlatformScene> scenes;
-    private List<String> menus;
+    private ActionSheet mActionSheet;
+    public static Activity mActivity;
+    private List<AISharedPlatformSDKInfo> mSDKInfos;
+    private List<AISharedPlatformScene> mScenes;
+    private List<String> mMenus;
 
-    private SharedFinishCallback callback;
-    private SharedDataModel data;
+    private SharedFinishCallback mCallback;
+    private SharedDataModel mData;
 
     // 微信
-    private static final  String WX_APP_ID = "wx7a296d05150143e5";
-    private static final  String WX_APP_SECRET = "dce5699086e990df3104052ce298f573";
-    private static final  String WX_APP_REDIRECTURI = "";
-    private IWXAPI wx_api;
+    public static final  String WX_APP_ID = "wx828ddb181a65570c";
+    public static final  String WX_APP_SECRET = "d2f36fee5809ea6d1909ff56e29f1e83";
+    public static final  String WX_APP_REDIRECTURI = "";
+    private IWXAPI mWXAPI;
 
-    private static final  String QQ_APP_ID = "1105282903";
-    private static final  String QQ_APP_SECRET = "HDTXtnSO0WkAPIgc";
-    private static final  String QQ_APP_REDIRECTURI = "";
+    public static final  String QQ_APP_ID = "1105282903";
+    public static final  String QQ_APP_SECRET = "HDTXtnSO0WkAPIgc";
+    public static final  String QQ_APP_REDIRECTURI = "";
+    public static Tencent mTencent;
+
 
     // 分享回调函数
     public interface SharedFinishCallback {
@@ -55,42 +67,48 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
 
     // 是否安装微信、QQ等app
     public boolean isInstallSharedApp () {
-        return wx_api.isWXAppInstalled();
+        return mWXAPI.isWXAppInstalled();
     }
 
     // 注册
     public void regiterSharedSDK(Activity activity) {
 
-        this.activity = activity;
-        this.actionSheet = new ActionSheet(this.activity);
-        this.actionSheet.setCancelable(false);
-        this.actionSheet.setCanceledOnTouchOutside(true);
-        this.actionSheet.setItemClickListener(this);
+        SharedManager.mActivity = activity;
+        this.mActionSheet = new ActionSheet(this.mActivity);
+        this.mActionSheet.setCancelable(false);
+        this.mActionSheet.setCanceledOnTouchOutside(true);
+        this.mActionSheet.setItemClickListener(this);
 
-        this.sdkInfos = new ArrayList<>();
-        this.scenes = new ArrayList<>();
-        this.menus = new ArrayList<>();
+        this.mSDKInfos = new ArrayList<>();
+        this.mScenes = new ArrayList<>();
+        this.mMenus = new ArrayList<>();
 
         AISharedPlatformSDKInfo sdk1 = new AISharedPlatformSDKInfo(E_AIPlatfrom.AIPlatfromWechat,
                 WX_APP_ID,WX_APP_SECRET,WX_APP_REDIRECTURI);
-        this.sdkInfos.add(sdk1);
+        AISharedPlatformSDKInfo sdk2 = new AISharedPlatformSDKInfo(E_AIPlatfrom.AIPlatfromQQ,
+                QQ_APP_ID,QQ_APP_SECRET,QQ_APP_REDIRECTURI);
+        this.mSDKInfos.add(sdk1);
+        this.mSDKInfos.add(sdk2);
         this.registerSharedPlatform();
     }
 
     private void registerSharedPlatform() {
 
-        for (AISharedPlatformSDKInfo item:this.sdkInfos) {
+        for (AISharedPlatformSDKInfo item:this.mSDKInfos) {
 
             E_AIPlatfrom platform = item.platfrom;
             if (platform == E_AIPlatfrom.AIPlatfromWechat) {
-                this.wx_api = WXAPIFactory.createWXAPI(this.activity,WX_APP_ID,true);
-                this.wx_api.registerApp(WX_APP_ID);
+                this.mWXAPI = WXAPIFactory.createWXAPI(this.mActivity,WX_APP_ID,true);
+                this.mWXAPI.registerApp(WX_APP_ID);
 
-                this.scenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneSession,"分享到微信好友"));
-                this.scenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneTimeline,"分享到微信朋友圈"));
-                this.scenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneFavorite,"分享到微信收藏"));
+                this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneSession,"分享到微信好友"));
+                this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneTimeline,"分享到微信朋友圈"));
+                this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneFavorite,"分享到微信收藏"));
             } else if(platform == E_AIPlatfrom.AIPlatfromQQ) {
+                SharedManager.mTencent = Tencent.createInstance(QQ_APP_ID,this.mActivity);
 
+                this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneSession,"分享到QQ好友"));
+                this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneTimeline,"分享到QQ空间"));
             } else if (platform == E_AIPlatfrom.AIPlatfromWeibo) {
 
             }
@@ -100,23 +118,31 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
     }
 
     private void addActionSheetMenu() {
-        for (AISharedPlatformScene scene:this.scenes ) {
-            this.menus.add(scene.sceneName);
+        for (AISharedPlatformScene scene:this.mScenes ) {
+            this.mMenus.add(scene.sceneName);
         }
 
-        this.actionSheet.setOtherButtonTitlesSimple(this.menus);
+        this.mActionSheet.setOtherButtonTitlesSimple(this.mMenus);
+    }
+
+    public void loginByWX() {
+        // send oauth request
+        final SendAuth.Req req = new SendAuth.Req();
+        req.scope = "snsapi_userinfo";
+        req.state = "weimeitc_aneProject";
+        this.mWXAPI.sendReq(req);
     }
 
 
     public void sharedData(SharedDataModel data,SharedFinishCallback callback)  {
-        this.data = data;
-        this.callback = callback;
-        this.actionSheet.show();
+        this.mData = data;
+        this.mCallback = callback;
+        this.mActionSheet.show();
     }
 
     @Override
     public void onActionSheetItemClick(ActionSheet actionSheet, int itemPosition, ActionSheet.ItemModel itemModel) {
-        AISharedPlatformScene scene = this.scenes.get(itemPosition);
+        AISharedPlatformScene scene = this.mScenes.get(itemPosition);
         if (scene.platfrom == E_AIPlatfrom.AIPlatfromWechat) {
             sharedToWeixin(scene);
         } else if (scene.platfrom == E_AIPlatfrom.AIPlatfromQQ) {
@@ -128,39 +154,44 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
 
     private void sharedToWeixin(AISharedPlatformScene scene) {
 
+        if (!this.mWXAPI.isWXAppInstalled()) {
+            Toast.makeText(this.mActivity,"手机未安装微信客户端!",Toast.LENGTH_SHORT);
+            return;
+        }
+
         SendMessageToWX.Req req = new SendMessageToWX.Req();
         req.scene = scene.scene.ordinal();
 
-        if (this.data.dataType == E_SharedDataType.SharedDataTypeText) {
+        if (this.mData.dataType == E_SharedDataType.SharedDataTypeText) {
 
             WXTextObject textObj = new WXTextObject();
-            textObj.text = this.data.content;
+            textObj.text = this.mData.content;
 
             WXMediaMessage msg = new WXMediaMessage();
             msg.mediaObject = textObj;
 
             req.transaction = APIHelper.buildTransaction("text");
             req.message = msg;
-        } else if (this.data.dataType == E_SharedDataType.SharedDataTypeImage) {
+        } else if (this.mData.dataType == E_SharedDataType.SharedDataTypeImage) {
             //req.
-            if (this.data.image != null) {
-                WXImageObject imgObj = new WXImageObject(this.data.image);
+            if (this.mData.image != null) {
+                WXImageObject imgObj = new WXImageObject(this.mData.image);
                 WXMediaMessage msg = new WXMediaMessage();
                 msg.mediaObject = imgObj;
 
-                Bitmap thumbBmp = Bitmap.createScaledBitmap(this.data.image, APIHelper.THUMB_SIZE, APIHelper.THUMB_SIZE, true);
+                Bitmap thumbBmp = Bitmap.createScaledBitmap(this.mData.image, APIHelper.THUMB_SIZE, APIHelper.THUMB_SIZE, true);
                 msg.thumbData = APIHelper.bmpToByteArray(thumbBmp,true);
 
                 req.transaction = APIHelper.buildTransaction("image");
                 req.message = msg;
             }
-        } else if (this.data.dataType == E_SharedDataType.SharedDataTypeImageURL) {
+        } else if (this.mData.dataType == E_SharedDataType.SharedDataTypeImageURL) {
 
             WXImageObject imageObject = new WXImageObject();
 
             WXMediaMessage msg = new WXMediaMessage();
             try {
-                Bitmap bmp = BitmapFactory.decodeStream(new URL(this.data.url).openStream());
+                Bitmap bmp = BitmapFactory.decodeStream(new URL(this.mData.url).openStream());
                 Bitmap thumbBmp = Bitmap.createScaledBitmap(bmp, APIHelper.THUMB_SIZE, APIHelper.THUMB_SIZE, true);
 
                 msg.thumbData = APIHelper.bmpToByteArray(thumbBmp, true);
@@ -174,25 +205,94 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
 
             req.transaction = APIHelper.buildTransaction("imageURL");
             req.message = msg;
-        } else if (this.data.dataType == E_SharedDataType.SharedDataTypeURL) {
+        } else if (this.mData.dataType == E_SharedDataType.SharedDataTypeURL) {
 
             WXWebpageObject webpage = new WXWebpageObject();
-            webpage.webpageUrl = this.data.url;
+            webpage.webpageUrl = this.mData.url;
 
             WXMediaMessage msg = new WXMediaMessage(webpage);
-            msg.title = this.data.title;
-            msg.description = this.data.content;
+            msg.title = this.mData.title;
+            msg.description = this.mData.content;
 
             req.transaction = APIHelper.buildTransaction("webpage");
             req.message = msg;
+
+
         }
 
-        wx_api.sendReq(req);
+        mWXAPI.sendReq(req);
     }
 
 
     private void sharedToQQ(AISharedPlatformScene scene) {
 
+        final Bundle params = new Bundle();
+
+        if (this.mData.dataType == E_SharedDataType.SharedDataTypeText) {
+            params.putString(QQShare.SHARE_TO_QQ_SUMMARY,this.mData.content);
+            params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_DEFAULT);
+        } else if (this.mData.dataType == E_SharedDataType.SharedDataTypeImage) {
+            params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE,QQShare.SHARE_TO_QQ_TYPE_IMAGE);
+
+            Bitmap bm = this.mData.image;
+            File file = new File(SharedManager.mActivity.getExternalCacheDir(),"temp.png");
+            if (file.exists()){
+                file.delete();
+            }
+
+            try {
+                FileOutputStream out = new FileOutputStream(file);
+                bm.compress(Bitmap.CompressFormat.PNG,90,out);
+                out.flush();
+                out.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            String filePath = file.getPath();
+            params.putString(QQShare.SHARE_TO_QQ_IMAGE_LOCAL_URL,filePath);
+
+        } else if (this.mData.dataType == E_SharedDataType.SharedDataTypeImageURL) {
+            params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_DEFAULT);
+            params.putString(QQShare.SHARE_TO_QQ_IMAGE_URL,this.mData.imageUrl);
+        } else if (this.mData.dataType == E_SharedDataType.SharedDataTypeURL) {
+            params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_DEFAULT);
+            params.putString(QQShare.SHARE_TO_QQ_TARGET_URL,this.mData.url);
+        }
+
+        // QQ分享要在主线程做
+        ThreadManager.getMainHandler().post(new Runnable() {
+
+            @Override
+            public void run() {
+                SharedManager.mTencent.shareToQQ(SharedManager.mActivity,params,SharedManager.this);
+            }
+        });
+    }
+
+
+    @Override
+    public void onCancel() {
+        File file = new File(SharedManager.mActivity.getExternalCacheDir(),"temp.png");
+        if (file.exists()){
+            file.delete();
+        }
+    }
+    @Override
+    public void onComplete(Object response) {
+        File file = new File(SharedManager.mActivity.getExternalCacheDir(),"temp.png");
+        if (file.exists()){
+            file.delete();
+        }
+    }
+    @Override
+    public void onError(UiError e) {
+        File file = new File(SharedManager.mActivity.getExternalCacheDir(),"temp.png");
+        if (file.exists()){
+            file.delete();
+        }
     }
 
     private void sharedToWeibo(AISharedPlatformScene scene) {
@@ -262,6 +362,7 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
         public String url;
         public String lowBandUrl;
         public Bitmap image;
+        public String imageUrl;
     }
 
     private static class APIHelper {

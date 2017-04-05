@@ -8,6 +8,7 @@ import com.wmtc.wmane.ANEFunction.SendImageFunction;
 import com.wmtc.wmane.ANEFunction.SendImageURLFunction;
 import com.wmtc.wmane.ANEFunction.SendLinkFunction;
 import com.wmtc.wmane.ANEFunction.SendTextFunction;
+import com.wmtc.wmane.ANEFunction.WXAuthFunction;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ public class WMContext extends FREContext {
 //    ANE_FUNCTION(sharing_function_image_url);
 //    ANE_FUNCTION(sharing_function_is_installed);
 
+    private static final String LOGIN_FUNCTION_WX = "login_function_wx";
     private static final String SHARING_FUNCTION_REGISTER = "sharing_function_register";
     private static final String SHARING_FUNCTION_TEXT = "sharing_function_text";
     private static final String SHARING_FUNCTION_LINK = "sharing_function_link";
@@ -38,31 +40,11 @@ public class WMContext extends FREContext {
 
     }
 
-
-    // com.wmtc.wmane
-    public static void setResourctID(String rName,FREContext context) throws Exception{
-        Class<?> R = Class.forName(rName);
-        Class<?>[] clss = R.getDeclaredClasses();
-        for (int i = 0; i < clss.length; i++) {
-            Class<?> cls = clss[i];
-            Field[] flds = cls.getDeclaredFields();
-            for (int j = 0; j < flds.length; j++) {
-                Field fld = flds[j];
-                fld.setAccessible(true);
-                Object obj = cls.newInstance();
-                String name = cls.getSimpleName()+"."+fld.getName();
-                int id = context.getResourceId(name);
-                fld.set(obj, id);
-            }
-        }
-    }
-
-
-
     @Override
     public Map<String, FREFunction> getFunctions() {
         Map<String, FREFunction> map = new HashMap<String, FREFunction>();
         //映射
+        map.put(LOGIN_FUNCTION_WX, new WXAuthFunction());
         map.put(SHARING_FUNCTION_REGISTER, new RegisterSDKFunction());
         map.put(SHARING_FUNCTION_TEXT, new SendTextFunction());
         map.put(SHARING_FUNCTION_LINK, new SendLinkFunction());

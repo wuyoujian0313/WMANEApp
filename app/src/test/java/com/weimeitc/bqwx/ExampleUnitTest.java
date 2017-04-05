@@ -1,4 +1,4 @@
-package com.weimeitc.wmaneapp;
+package com.weimeitc.bqwx;
 
 import org.junit.Test;
 
