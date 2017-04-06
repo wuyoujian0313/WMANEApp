@@ -39,7 +39,7 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
     private SharedFinishCallback mCallback;
     private SharedDataModel mData;
 
-    // 微信
+    // 微信 - 北汽电工
     public static final  String WX_APP_ID = "wx828ddb181a65570c";
     public static final  String WX_APP_SECRET = "d2f36fee5809ea6d1909ff56e29f1e83";
     public static final  String WX_APP_REDIRECTURI = "";
@@ -131,6 +131,9 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
         req.scope = "snsapi_userinfo";
         req.state = "weimeitc_aneProject";
         this.mWXAPI.sendReq(req);
+    }
+
+    public void loginByQQ() {
     }
 
 

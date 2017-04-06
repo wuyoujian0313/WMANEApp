@@ -3,6 +3,7 @@ package com.wmtc.wmane;
 import com.adobe.fre.FREContext;
 import com.adobe.fre.FREFunction;
 import com.wmtc.wmane.ANEFunction.IsinstallFunction;
+import com.wmtc.wmane.ANEFunction.QQAuthFunction;
 import com.wmtc.wmane.ANEFunction.RegisterSDKFunction;
 import com.wmtc.wmane.ANEFunction.SendImageFunction;
 import com.wmtc.wmane.ANEFunction.SendImageURLFunction;
@@ -20,13 +21,7 @@ import java.util.Map;
 
 public class WMContext extends FREContext {
 
-//    ANE_FUNCTION(sharing_function_register);
-//    ANE_FUNCTION(sharing_function_text);
-//    ANE_FUNCTION(sharing_function_link);
-//    ANE_FUNCTION(sharing_function_image);
-//    ANE_FUNCTION(sharing_function_image_url);
-//    ANE_FUNCTION(sharing_function_is_installed);
-
+    private static final String LOGIN_FUNCTION_QQ = "login_function_qq";
     private static final String LOGIN_FUNCTION_WX = "login_function_wx";
     private static final String SHARING_FUNCTION_REGISTER = "sharing_function_register";
     private static final String SHARING_FUNCTION_TEXT = "sharing_function_text";
@@ -44,6 +39,7 @@ public class WMContext extends FREContext {
     public Map<String, FREFunction> getFunctions() {
         Map<String, FREFunction> map = new HashMap<String, FREFunction>();
         //映射
+        map.put(LOGIN_FUNCTION_QQ, new QQAuthFunction());
         map.put(LOGIN_FUNCTION_WX, new WXAuthFunction());
         map.put(SHARING_FUNCTION_REGISTER, new RegisterSDKFunction());
         map.put(SHARING_FUNCTION_TEXT, new SendTextFunction());

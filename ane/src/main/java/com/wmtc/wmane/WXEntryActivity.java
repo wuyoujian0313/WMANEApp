@@ -40,7 +40,10 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                 final String url = String.format("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code",
                         appId,appSecret,code);
 
-                new Thread(new Runnable() {
+
+                // QQ分享要在主线程做
+                ThreadManager.getMainHandler().post(new Runnable() {
+
                     @Override
                     public void run() {
                         try {
@@ -72,7 +75,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                             e.printStackTrace();
                         }
                     }
-                }).start();
+                });
 
                 break;
             case BaseResp.ErrCode.ERR_USER_CANCEL:
