@@ -41,7 +41,7 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:configChanges="orientation|keyboardHidden">
         </activity>
-        <activity android:name="com.wmtc.wmane.WXEntryActivity" android:exported="true"></activity>
+        <activity android:name="air.com.weimeitc.bqwx.wxapi.WXEntryActivity" android:exported="true"></activity>
 
 
     </application>

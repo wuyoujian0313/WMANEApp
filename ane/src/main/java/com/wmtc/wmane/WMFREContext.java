@@ -19,7 +19,7 @@ import java.util.Map;
  * Created by wuyoujian on 17/3/15.
  */
 
-public class WMContext extends FREContext {
+public class WMFREContext extends FREContext {
 
     private static final String LOGIN_FUNCTION_QQ = "login_function_qq";
     private static final String LOGIN_FUNCTION_WX = "login_function_wx";

@@ -1,4 +1,4 @@
-package com.wmtc.wmane;
+package com.wmtc.wmane.SharedSDK;
 
 
 import java.lang.reflect.Field;

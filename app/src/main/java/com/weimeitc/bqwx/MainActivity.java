@@ -10,7 +10,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-import com.wmtc.wmane.*;
+import com.wmtc.wmane.SharedSDK.ActionSheet;
+import com.wmtc.wmane.SharedSDK.SharedManager;
 
 //air.com.weimeitc.bqwx:039fcbae92e6388b7a9babf728ddf696
 //air.com.weimeitc.bqdj:233936a9c7c6ff761eb23e34f0e55ceb

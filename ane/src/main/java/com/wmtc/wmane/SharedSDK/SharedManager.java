@@ -1,17 +1,15 @@
-package com.wmtc.wmane;
+package com.wmtc.wmane.SharedSDK;
 
 /**
  * Created by wuyoujian on 17/3/14.
  */
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.tencent.connect.auth.QQToken;
 import com.tencent.connect.share.QQShare;
 import com.tencent.mm.opensdk.modelmsg.*;
 import com.tencent.mm.opensdk.openapi.*;
@@ -28,10 +26,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+//air.com.weimeitc.bqwx:039fcbae92e6388b7a9babf728ddf696
+//air.com.weimeitc.bqdj:233936a9c7c6ff761eb23e34f0e55ceb
+
 public class SharedManager implements ActionSheet.IActionSheetListener,IUiListener {
 
     private ActionSheet mActionSheet;
-    public static Activity mActivity;
+    public static Activity activity;
     private List<AISharedPlatformSDKInfo> mSDKInfos;
     private List<AISharedPlatformScene> mScenes;
     private List<String> mMenus;
@@ -43,12 +44,12 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
     public static final  String WX_APP_ID = "wx828ddb181a65570c";
     public static final  String WX_APP_SECRET = "d2f36fee5809ea6d1909ff56e29f1e83";
     public static final  String WX_APP_REDIRECTURI = "";
-    private IWXAPI mWXAPI;
+    public static IWXAPI wxapi;
 
     public static final  String QQ_APP_ID = "1105282903";
     public static final  String QQ_APP_SECRET = "HDTXtnSO0WkAPIgc";
     public static final  String QQ_APP_REDIRECTURI = "";
-    public static Tencent mTencent;
+    public static Tencent tencentAPI;
 
 
     // 分享回调函数
@@ -67,14 +68,14 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
 
     // 是否安装微信、QQ等app
     public boolean isInstallSharedApp () {
-        return mWXAPI.isWXAppInstalled();
+        return wxapi.isWXAppInstalled();
     }
 
     // 注册
     public void regiterSharedSDK(Activity activity) {
 
-        SharedManager.mActivity = activity;
-        this.mActionSheet = new ActionSheet(this.mActivity);
+        SharedManager.activity = activity;
+        this.mActionSheet = new ActionSheet(this.activity);
         this.mActionSheet.setCancelable(false);
         this.mActionSheet.setCanceledOnTouchOutside(true);
         this.mActionSheet.setItemClickListener(this);
@@ -98,14 +99,14 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
 
             E_AIPlatfrom platform = item.platfrom;
             if (platform == E_AIPlatfrom.AIPlatfromWechat) {
-                this.mWXAPI = WXAPIFactory.createWXAPI(this.mActivity,WX_APP_ID,true);
-                this.mWXAPI.registerApp(WX_APP_ID);
+                this.wxapi = WXAPIFactory.createWXAPI(this.activity,WX_APP_ID,true);
+                this.wxapi.registerApp(WX_APP_ID);
 
                 this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneSession,"分享到微信好友"));
                 this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneTimeline,"分享到微信朋友圈"));
                 this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneFavorite,"分享到微信收藏"));
             } else if(platform == E_AIPlatfrom.AIPlatfromQQ) {
-                SharedManager.mTencent = Tencent.createInstance(QQ_APP_ID,this.mActivity);
+                SharedManager.tencentAPI = Tencent.createInstance(QQ_APP_ID,this.activity);
 
                 this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneSession,"分享到QQ好友"));
                 this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneTimeline,"分享到QQ空间"));
@@ -130,7 +131,7 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
         final SendAuth.Req req = new SendAuth.Req();
         req.scope = "snsapi_userinfo";
         req.state = "weimeitc_aneProject";
-        this.mWXAPI.sendReq(req);
+        this.wxapi.sendReq(req);
     }
 
     public void loginByQQ() {
@@ -157,8 +158,8 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
 
     private void sharedToWeixin(AISharedPlatformScene scene) {
 
-        if (!this.mWXAPI.isWXAppInstalled()) {
-            Toast.makeText(this.mActivity,"手机未安装微信客户端!",Toast.LENGTH_SHORT);
+        if (!this.wxapi.isWXAppInstalled()) {
+            Toast.makeText(this.activity,"手机未安装微信客户端!",Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -223,7 +224,7 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
 
         }
 
-        mWXAPI.sendReq(req);
+        wxapi.sendReq(req);
     }
 
 
@@ -238,7 +239,7 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
             params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE,QQShare.SHARE_TO_QQ_TYPE_IMAGE);
 
             Bitmap bm = this.mData.image;
-            File file = new File(SharedManager.mActivity.getExternalCacheDir(),"temp.png");
+            File file = new File(SharedManager.activity.getExternalCacheDir(),"temp.png");
             if (file.exists()){
                 file.delete();
             }
@@ -270,7 +271,7 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
 
             @Override
             public void run() {
-                SharedManager.mTencent.shareToQQ(SharedManager.mActivity,params,SharedManager.this);
+                SharedManager.tencentAPI.shareToQQ(SharedManager.activity,params,SharedManager.this);
             }
         });
     }
@@ -278,21 +279,21 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
 
     @Override
     public void onCancel() {
-        File file = new File(SharedManager.mActivity.getExternalCacheDir(),"temp.png");
+        File file = new File(SharedManager.activity.getExternalCacheDir(),"temp.png");
         if (file.exists()){
             file.delete();
         }
     }
     @Override
     public void onComplete(Object response) {
-        File file = new File(SharedManager.mActivity.getExternalCacheDir(),"temp.png");
+        File file = new File(SharedManager.activity.getExternalCacheDir(),"temp.png");
         if (file.exists()){
             file.delete();
         }
     }
     @Override
     public void onError(UiError e) {
-        File file = new File(SharedManager.mActivity.getExternalCacheDir(),"temp.png");
+        File file = new File(SharedManager.activity.getExternalCacheDir(),"temp.png");
         if (file.exists()){
             file.delete();
         }

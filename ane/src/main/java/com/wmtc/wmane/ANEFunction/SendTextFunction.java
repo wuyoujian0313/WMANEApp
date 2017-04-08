@@ -4,7 +4,7 @@ import com.adobe.fre.FREContext;
 import com.adobe.fre.FREFunction;
 import com.adobe.fre.FREObject;
 import com.wmtc.wmane.ANETypeConversion;
-import com.wmtc.wmane.SharedManager;
+import com.wmtc.wmane.SharedSDK.SharedManager;
 
 /**
  * Created by wuyoujian on 17/3/15.
