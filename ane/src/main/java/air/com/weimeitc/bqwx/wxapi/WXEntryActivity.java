@@ -13,6 +13,7 @@ import com.tencent.mm.opensdk.modelbase.BaseResp;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 import com.wmtc.wmane.SharedSDK.SharedManager;
+import com.wmtc.wmane.WMANEShare;
 import com.wmtc.wmane.WMFREContext;
 
 import okhttp3.OkHttpClient;
@@ -52,7 +53,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             String unionId = data.getString("unionId");
             // UI界面的更新等相关操作
             Toast.makeText(SharedManager.activity,"User Nickname is " + nickname + " unionId: " + unionId,Toast.LENGTH_SHORT).show();
-           // WMFREContext.getSingleton().dispatchStatusEventAsync(nickname,unionId);
+            WMANEShare.getSingleton().getFreContext().dispatchStatusEventAsync(nickname,unionId);
         }
     };
 
