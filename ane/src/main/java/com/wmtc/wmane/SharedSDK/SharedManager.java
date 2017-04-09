@@ -17,6 +17,8 @@ import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
 
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -43,6 +45,11 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
     // 微信 - 北汽电工
     public static final  String WX_APP_ID = "wx828ddb181a65570c";
     public static final  String WX_APP_SECRET = "d2f36fee5809ea6d1909ff56e29f1e83";
+
+    // 北汽电机
+//    public static final  String WX_APP_ID = "wxf74876d011fb1356";
+//    public static final  String WX_APP_SECRET = "d2f36fee5809ea6d1909ff56e29f1e83";
+
     public static final  String WX_APP_REDIRECTURI = "";
     public static IWXAPI wxapi;
 
@@ -134,7 +141,39 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
         this.wxapi.sendReq(req);
     }
 
+    private class BaseUiListener implements IUiListener {
+
+        @Override
+        public void onComplete(Object response) {
+            if (null == response) {
+                return;
+            }
+            JSONObject jsonResponse = (JSONObject) response;
+            doComplete((JSONObject)response);
+        }
+
+        protected void doComplete(JSONObject values) {
+            //
+            Toast.makeText(SharedManager.activity,"QQ back to",Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onError(UiError e) {
+        }
+
+        @Override
+        public void onCancel() {
+        }
+    }
+
     public void loginByQQ() {
+
+        BaseUiListener loginListener = new BaseUiListener();
+        if (!tencentAPI.isSessionValid()) {
+            tencentAPI.login(activity, "all", loginListener);
+        } else {
+            tencentAPI.logout(activity);
+        }
     }
 
 
