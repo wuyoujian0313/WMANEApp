@@ -5,6 +5,7 @@ package com.wmtc.wmane.SharedSDK;
  */
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -13,11 +14,6 @@ import android.widget.Toast;
 import com.tencent.connect.share.QQShare;
 import com.tencent.mm.opensdk.modelmsg.*;
 import com.tencent.mm.opensdk.openapi.*;
-import com.tencent.tauth.IUiListener;
-import com.tencent.tauth.Tencent;
-import com.tencent.tauth.UiError;
-
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -28,16 +24,19 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import air.com.weimeitc.bqwx.QQEntryActivity;
+
 //air.com.weimeitc.bqwx:039fcbae92e6388b7a9babf728ddf696
 //air.com.weimeitc.bqdj:233936a9c7c6ff761eb23e34f0e55ceb
 
-public class SharedManager implements ActionSheet.IActionSheetListener,IUiListener {
+public class SharedManager implements ActionSheet.IActionSheetListener {
 
     private ActionSheet mActionSheet;
     public static Activity activity;
     private List<AISharedPlatformSDKInfo> mSDKInfos;
     private List<AISharedPlatformScene> mScenes;
     private List<String> mMenus;
+    //private BaseUiListener loginQQListener;
 
     private SharedFinishCallback mCallback;
     private SharedDataModel mData;
@@ -48,15 +47,21 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
 
     // 北汽电机
 //    public static final  String WX_APP_ID = "wxf74876d011fb1356";
-//    public static final  String WX_APP_SECRET = "d2f36fee5809ea6d1909ff56e29f1e83";
+//    public static final  String WX_APP_SECRET = "fedba484c5f88fc3398eee6bda007dce";
 
     public static final  String WX_APP_REDIRECTURI = "";
     public static IWXAPI wxapi;
 
-    public static final  String QQ_APP_ID = "1105282903";
-    public static final  String QQ_APP_SECRET = "HDTXtnSO0WkAPIgc";
+    // 北汽电工
+    public static final  String QQ_APP_ID = "1106131684";
+    public static final  String QQ_APP_SECRET = "7kuxHSwsLybdLQ5O";
+
+    // 北汽电机
+//    public static final  String QQ_APP_ID = "1106060269";
+//    public static final  String QQ_APP_SECRET = "OR7B2A2kRZC6riPH";
+
     public static final  String QQ_APP_REDIRECTURI = "";
-    public static Tencent tencentAPI;
+
 
 
     // 分享回调函数
@@ -113,7 +118,6 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
                 this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneTimeline,"分享到微信朋友圈"));
                 this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneFavorite,"分享到微信收藏"));
             } else if(platform == E_AIPlatfrom.AIPlatfromQQ) {
-                SharedManager.tencentAPI = Tencent.createInstance(QQ_APP_ID,this.activity);
 
                 this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneSession,"分享到QQ好友"));
                 this.mScenes.add(new AISharedPlatformScene(platform,E_AIPlatformScene.AIPlatformSceneTimeline,"分享到QQ空间"));
@@ -138,42 +142,14 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
         final SendAuth.Req req = new SendAuth.Req();
         req.scope = "snsapi_userinfo";
         req.state = "weimeitc_aneProject";
+
         this.wxapi.sendReq(req);
     }
 
-    private class BaseUiListener implements IUiListener {
-
-        @Override
-        public void onComplete(Object response) {
-            if (null == response) {
-                return;
-            }
-            JSONObject jsonResponse = (JSONObject) response;
-            doComplete((JSONObject)response);
-        }
-
-        protected void doComplete(JSONObject values) {
-            //
-            Toast.makeText(SharedManager.activity,"QQ back to",Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onError(UiError e) {
-        }
-
-        @Override
-        public void onCancel() {
-        }
-    }
-
     public void loginByQQ() {
-
-        BaseUiListener loginListener = new BaseUiListener();
-        if (!tencentAPI.isSessionValid()) {
-            tencentAPI.login(activity, "all", loginListener);
-        } else {
-            tencentAPI.logout(activity);
-        }
+        Intent intent = new Intent(activity,QQEntryActivity.class);
+        intent.putExtra("type","auth");
+        activity.startActivity(intent);
     }
 
 
@@ -271,6 +247,7 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
 
         final Bundle params = new Bundle();
 
+        params.putString(QQShare.SHARE_TO_QQ_TITLE, "QQ分享");
         if (this.mData.dataType == E_SharedDataType.SharedDataTypeText) {
             params.putString(QQShare.SHARE_TO_QQ_SUMMARY,this.mData.content);
             params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_DEFAULT);
@@ -305,38 +282,14 @@ public class SharedManager implements ActionSheet.IActionSheetListener,IUiListen
             params.putString(QQShare.SHARE_TO_QQ_TARGET_URL,this.mData.url);
         }
 
-        // QQ分享要在主线程做
-        ThreadManager.getMainHandler().post(new Runnable() {
-
-            @Override
-            public void run() {
-                SharedManager.tencentAPI.shareToQQ(SharedManager.activity,params,SharedManager.this);
-            }
-        });
+        Intent intent = new Intent(activity,QQEntryActivity.class);
+        intent.putExtra("type","sharing");
+        intent.putExtra("params",params);
+        activity.startActivity(intent);
     }
 
 
-    @Override
-    public void onCancel() {
-        File file = new File(SharedManager.activity.getExternalCacheDir(),"temp.png");
-        if (file.exists()){
-            file.delete();
-        }
-    }
-    @Override
-    public void onComplete(Object response) {
-        File file = new File(SharedManager.activity.getExternalCacheDir(),"temp.png");
-        if (file.exists()){
-            file.delete();
-        }
-    }
-    @Override
-    public void onError(UiError e) {
-        File file = new File(SharedManager.activity.getExternalCacheDir(),"temp.png");
-        if (file.exists()){
-            file.delete();
-        }
-    }
+
 
     private void sharedToWeibo(AISharedPlatformScene scene) {
 

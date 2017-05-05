@@ -51,8 +51,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             String nickname = data.getString("nickname");
             String unionId = data.getString("unionId");
             // UI界面的更新等相关操作
-            Toast.makeText(SharedManager.activity,"User Nickname is " + nickname + " unionId: " + unionId,Toast.LENGTH_SHORT).show();
-            WMANEShare.getSingleton().getFreContext().dispatchStatusEventAsync(nickname,unionId);
+
+            WMANEShare.getSingleton().getFreContext().dispatchStatusEventAsync("login_function_qq",nickname +"###"+unionId);
         }
     };
 
