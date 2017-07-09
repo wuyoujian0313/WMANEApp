@@ -89,6 +89,7 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
         SharedManager.activity = activity;
         this.mActionSheet = new ActionSheet(this.activity);
         this.mActionSheet.setCancelable(false);
+        this.mActionSheet.setHaveCancleBtn(true);
         this.mActionSheet.setCanceledOnTouchOutside(true);
         this.mActionSheet.setItemClickListener(this);
 
