@@ -52,7 +52,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             String unionId = data.getString("unionId");
             // UI界面的更新等相关操作
 
-            WMANEShare.getSingleton().getFreContext().dispatchStatusEventAsync("login_function_qq",nickname +"###"+unionId);
+            WMANEShare.getSingleton().getFreContext().dispatchStatusEventAsync("login_function_wx",nickname +"###"+unionId);
         }
     };
 

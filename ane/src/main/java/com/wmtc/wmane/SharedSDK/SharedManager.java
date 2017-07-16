@@ -24,10 +24,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import air.com.weimeitc.bqwx.QQEntryActivity;
-
 //air.com.weimeitc.bqwx:039fcbae92e6388b7a9babf728ddf696
 //air.com.weimeitc.bqdj:233936a9c7c6ff761eb23e34f0e55ceb
+import air.com.weimeitc.bqdj.QQEntryActivity;
+
 
 public class SharedManager implements ActionSheet.IActionSheetListener {
 
@@ -41,25 +41,20 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
     private SharedFinishCallback mCallback;
     private SharedDataModel mData;
 
-    // 微信 - 北汽电工
-    public static final  String WX_APP_ID = "wx828ddb181a65570c";
-    public static final  String WX_APP_SECRET = "d2f36fee5809ea6d1909ff56e29f1e83";
+    // 微信 - 北汽高级维修
+//    public static final  String WX_APP_ID = "wx828ddb181a65570c";
+//    public static final  String WX_APP_SECRET = "d2f36fee5809ea6d1909ff56e29f1e83";
+//    public static final  String QQ_APP_ID = "1106131684";
+//    public static final  String QQ_APP_SECRET = "7kuxHSwsLybdLQ5O";
 
-    // 北汽电机
-//    public static final  String WX_APP_ID = "wxf74876d011fb1356";
-//    public static final  String WX_APP_SECRET = "fedba484c5f88fc3398eee6bda007dce";
+    // 北汽电机知识
+    public static final  String WX_APP_ID = "wxf74876d011fb1356";
+    public static final  String WX_APP_SECRET = "fedba484c5f88fc3398eee6bda007dce";
+    public static final  String QQ_APP_ID = "1106060269";
+    public static final  String QQ_APP_SECRET = "OR7B2A2kRZC6riPH";
 
     public static final  String WX_APP_REDIRECTURI = "";
     public static IWXAPI wxapi;
-
-    // 北汽电工
-    public static final  String QQ_APP_ID = "1106131684";
-    public static final  String QQ_APP_SECRET = "7kuxHSwsLybdLQ5O";
-
-    // 北汽电机
-//    public static final  String QQ_APP_ID = "1106060269";
-//    public static final  String QQ_APP_SECRET = "OR7B2A2kRZC6riPH";
-
     public static final  String QQ_APP_REDIRECTURI = "";
 
 
