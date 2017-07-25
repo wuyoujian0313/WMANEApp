@@ -42,16 +42,16 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
     private SharedDataModel mData;
 
     // 微信 - 北汽高级维修
-//    public static final  String WX_APP_ID = "wx828ddb181a65570c";
-//    public static final  String WX_APP_SECRET = "d2f36fee5809ea6d1909ff56e29f1e83";
-//    public static final  String QQ_APP_ID = "1106131684";
-//    public static final  String QQ_APP_SECRET = "7kuxHSwsLybdLQ5O";
+    public static final  String WX_APP_ID = "wx828ddb181a65570c";
+    public static final  String WX_APP_SECRET = "d2f36fee5809ea6d1909ff56e29f1e83";
+    public static final  String QQ_APP_ID = "1106131684";
+    public static final  String QQ_APP_SECRET = "7kuxHSwsLybdLQ5O";
 
     // 北汽电机知识
-    public static final  String WX_APP_ID = "wxf74876d011fb1356";
-    public static final  String WX_APP_SECRET = "fedba484c5f88fc3398eee6bda007dce";
-    public static final  String QQ_APP_ID = "1106060269";
-    public static final  String QQ_APP_SECRET = "OR7B2A2kRZC6riPH";
+//    public static final  String WX_APP_ID = "wxf74876d011fb1356";
+//    public static final  String WX_APP_SECRET = "fedba484c5f88fc3398eee6bda007dce";
+//    public static final  String QQ_APP_ID = "1106060269";
+//    public static final  String QQ_APP_SECRET = "OR7B2A2kRZC6riPH";
 
     public static final  String WX_APP_REDIRECTURI = "";
     public static IWXAPI wxapi;
@@ -184,6 +184,8 @@ public class SharedManager implements ActionSheet.IActionSheetListener {
 
             WXMediaMessage msg = new WXMediaMessage();
             msg.mediaObject = textObj;
+            msg.title = "title";
+            msg.description = "description";
 
             req.transaction = APIHelper.buildTransaction("text");
             req.message = msg;

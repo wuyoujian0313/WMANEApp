@@ -1,4 +1,4 @@
-package com.weimeitc.bqwx;
+package air.com.weimeitc.bqwx;
 
 
 
@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
                 SharedManager.SharedDataModel model = SharedManager.getSingleton().new SharedDataModel();
 
+                model.title = "test";
                 model.dataType = SharedManager.E_SharedDataType.SharedDataTypeText;
                 model.content = "demoTest";
                 SharedManager.getSingleton().sharedData(model, new SharedManager.SharedFinishCallback() {

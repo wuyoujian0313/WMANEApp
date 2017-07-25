@@ -1,4 +1,4 @@
-package com.weimeitc.bqwx;
+package air.com.weimeitc.bqwx;
 
 import android.app.Application;
 import android.content.Context;
